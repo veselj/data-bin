@@ -25,7 +25,7 @@ variable "root_domain" {
 variable "s3_bucket_name" {
   description = "Name of the S3 bucket used to store payloads"
   type        = string
-  default     = ""
+  default     = "data-bin.laetus.uk"
 }
 
 variable "lambda_zip_path" {

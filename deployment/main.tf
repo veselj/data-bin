@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.6"
+  required_version = ">= 1.5"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -20,7 +20,6 @@ provider "aws" {
 
 locals {
   name        = "data-bin-${var.environment}"
-  zip_path    = "../build/data-bin.zip"
   bucket_name = var.s3_bucket_name != "" ? var.s3_bucket_name : "${local.name}-data"
 }
 
@@ -91,8 +90,8 @@ resource "aws_iam_role_policy" "s3_write" {
 
 resource "aws_lambda_function" "api" {
   function_name    = local.name
-  filename         = local.zip_path
-  source_code_hash = filebase64sha256(local.zip_path)
+  filename         = var.lambda_zip_path
+  source_code_hash = filebase64sha256(var.lambda_zip_path)
   role             = aws_iam_role.lambda.arn
   handler          = "bootstrap"
   runtime          = "provided.al2023"
