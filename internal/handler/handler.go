@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -28,16 +29,22 @@ type response struct {
 }
 
 func (h *Handler) Handle(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
-	if req.RequestContext.HTTP.Method != http.MethodPost {
+	method := req.RequestContext.HTTP.Method
+	slog.Info("request", "method", method, "sourceIP", req.RequestContext.HTTP.SourceIP)
+
+	if method != http.MethodPost {
+		slog.Warn("method not allowed", "method", method)
 		return apiResp(http.StatusMethodNotAllowed, `{"error":"method not allowed"}`), nil
 	}
 
 	body, err := requestBody(req)
 	if err != nil {
+		slog.Error("failed to decode body", "error", err)
 		return apiResp(http.StatusBadRequest, `{"error":"failed to read body"}`), nil
 	}
 
 	if len(body) == 0 {
+		slog.Warn("empty body")
 		return apiResp(http.StatusBadRequest, `{"error":"empty body"}`), nil
 	}
 
@@ -51,9 +58,11 @@ func (h *Handler) Handle(ctx context.Context, req events.APIGatewayV2HTTPRequest
 
 	key, err := h.store.Put(ctx, ct, body)
 	if err != nil {
+		slog.Error("failed to store object", "error", err)
 		return apiResp(http.StatusInternalServerError, `{"error":"failed to store data"}`), fmt.Errorf("store: %w", err)
 	}
 
+	slog.Info("stored", "key", key, "bytes", len(body), "contentType", ct)
 	out, _ := json.Marshal(response{Key: key})
 	return apiResp(http.StatusCreated, string(out)), nil
 }
