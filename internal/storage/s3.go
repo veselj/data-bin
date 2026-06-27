@@ -31,7 +31,7 @@ func New(ctx context.Context, bucket string) (*S3Store, error) {
 // Put stores body in S3 and returns the object key.
 func (s *S3Store) Put(ctx context.Context, contentType string, body []byte) (string, error) {
 	now := time.Now().UTC()
-	key := fmt.Sprintf("data/%d/%02d/%02d/%s", now.Year(), now.Month(), now.Day(), uuid.New().String())
+	key := fmt.Sprintf("%d_%02d_%02d_%s", now.Year(), now.Month(), now.Day(), uuid.New().String())
 
 	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:      aws.String(s.bucket),

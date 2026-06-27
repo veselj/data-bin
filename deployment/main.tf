@@ -81,7 +81,7 @@ resource "aws_iam_role_policy" "s3_write" {
     Statement = [{
       Effect   = "Allow"
       Action   = ["s3:PutObject"]
-      Resource = "${aws_s3_bucket.data.arn}/data/*"
+      Resource = "${aws_s3_bucket.data.arn}/*"
     }]
   })
 }
